@@ -49,7 +49,7 @@ public class EmployeeController {
             Map<String, Object> errorDetails = new HashMap<>();
             errorDetails.put("timestamp", LocalDateTime.now());
             errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Employee not fount");
+            errorDetails.put("error", "Employee not found");
             errorDetails.put("message", "No employee found with id: " + id);
             errorDetails.put("path", "/api/employees/get-by-id/" + id);
 
@@ -92,7 +92,7 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
-        employee.setId(id);
+        employee.setId(id); // ensure the path ID is synced with the object
 
         Optional<Employee> result = employeeService.updateEmployee(employee);
 
