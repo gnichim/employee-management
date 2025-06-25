@@ -43,7 +43,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable int id, @RequestBody Employee employee) {
+    public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
         employee.setId(id); // ensure the path ID is synced with the object
         return employeeService.updateEmployee(employee)
                 .map(updatedEmployee -> new ResponseEntity<>(updatedEmployee, HttpStatus.OK))
