@@ -23,9 +23,23 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
-        return new ResponseEntity<>(departmentService.createDepartment(department),
-                HttpStatus.CREATED);
+    public ResponseEntity<?> createDepartment(@RequestBody Department department) {
+        try {
+            Department saved = departmentService.createDepartment(department);
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        } catch (IllegalArgumentException ex) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("timestamp", LocalDateTime.now());
+            response.put("status", HttpStatus.CONFLICT.value());
+            response.put("error", "Department already exists");
+            response.put("message", ex.getMessage());
+            response.put("path", "/api/departments");
+
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        }
+
+        // return new ResponseEntity<>(departmentService.createDepartment(department),
+        //        HttpStatus.CREATED);
     }
 
     @GetMapping

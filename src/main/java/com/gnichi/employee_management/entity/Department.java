@@ -19,7 +19,8 @@ public class Department {
     @Id
     @GeneratedValue
     private long id;
-    @Column(length = 50)
+    // Enforce Name Uniqueness at the DB Level Too
+    @Column(length = 50, unique = true, nullable = false)
     private String name;
 
     // mappedBy = "department" points to the property inside Employee.

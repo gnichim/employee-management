@@ -18,6 +18,10 @@ public class DepartmentService {
     }
 
     public Department createDepartment(Department department) {
+        Optional<Department> existingDepartment = departmentRepository.findByNameIgnoreCase(department.getName());
+        if (existingDepartment.isPresent()) {
+            throw new IllegalArgumentException("Department with name '" + department.getName() + "' already exists");
+        }
         return this.departmentRepository.save(department);
     }
 
