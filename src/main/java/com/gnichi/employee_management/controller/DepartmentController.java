@@ -23,23 +23,10 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createDepartment(@RequestBody Department department) {
-        try {
-            Department saved = departmentService.createDepartment(department);
-            return new ResponseEntity<>(saved, HttpStatus.CREATED);
-        } catch (IllegalArgumentException ex) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("timestamp", LocalDateTime.now());
-            response.put("status", HttpStatus.CONFLICT.value());
-            response.put("error", "Department already exists");
-            response.put("message", ex.getMessage());
-            response.put("path", "/api/departments");
+    public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
+        Department saved = departmentService.createDepartment(department);
 
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-        }
-
-        // return new ResponseEntity<>(departmentService.createDepartment(department),
-        //        HttpStatus.CREATED);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -55,21 +42,10 @@ public class DepartmentController {
     } */
 
     @GetMapping("get-by-id/{id}")
-    public ResponseEntity<?> getDepartmentById(@PathVariable long id) {
-        Optional<Department> optional = departmentService.getDepartmentById(id);
+    public ResponseEntity<Department> getDepartmentById(@PathVariable long id) {
+        Department dept = departmentService.getDepartmentById(id); // throws if not found
 
-        if (optional.isPresent()) {
-            return new ResponseEntity<>(optional.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Department not found");
-            errorDetails.put("message", "No department found with id: " + id);
-            errorDetails.put("path", "/api/departments/get-by-id/" + id);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(dept, HttpStatus.OK);
     }
 
     /* @GetMapping("get-by-name/{name}")
@@ -80,21 +56,10 @@ public class DepartmentController {
     } */
 
     @GetMapping("get-by-name/{name}")
-    public ResponseEntity<?> getDepartmentByName(@PathVariable String name) {
-        Optional<Department> optional = departmentService.getDepartmentByName(name);
+    public ResponseEntity<Department> getDepartmentByName(@PathVariable String name) {
+        Department dept = departmentService.getDepartmentByName(name);
 
-        if (optional.isPresent()) {
-            return new ResponseEntity<>(optional.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Department not found");
-            errorDetails.put("message", "No department found with name: " + name);
-            errorDetails.put("path", "/api/departments/get-by-name/" + name);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(dept, HttpStatus.OK);
     }
 
     /* @PutMapping("/{id}")
@@ -106,23 +71,12 @@ public class DepartmentController {
     } */
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDepartment(@PathVariable long id, @RequestBody Department department) {
+    public ResponseEntity<Department> updateDepartment(@PathVariable long id, @RequestBody Department department) {
         department.setId(id); // ensure the path ID is synced with the object
 
-        Optional<Department> result = departmentService.updateDepartment(department);
+        Department result = departmentService.updateDepartment(department);
 
-        if (result.isPresent()) {
-            return new ResponseEntity<>(result.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Department not found");
-            errorDetails.put("message", "No department found with ID: " + id);
-            errorDetails.put("path", "/api/departments/" + id);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /* @DeleteMapping("/{id}")
@@ -133,20 +87,10 @@ public class DepartmentController {
     } */
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDepartment(@PathVariable long id) {
-        boolean deleted = departmentService.removeDepartment(id);
+    public ResponseEntity<Void> deleteDepartment(@PathVariable long id) {
+        departmentService.removeDepartment(id);
 
-        if (deleted) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put("timestamp", LocalDateTime.now());
-            response.put("status", HttpStatus.NOT_FOUND.value());
-            response.put("error", "Department not found");
-            response.put("message", "No department found with ID: " + id);
-            response.put("path", "/api/departments/" + id);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

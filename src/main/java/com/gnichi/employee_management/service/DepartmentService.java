@@ -2,6 +2,7 @@ package com.gnichi.employee_management.service;
 
 import com.gnichi.employee_management.entity.Department;
 import com.gnichi.employee_management.repository.DepartmentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,28 +30,28 @@ public class DepartmentService {
         return this.departmentRepository.findAll();
     }
 
-    public Optional<Department> getDepartmentById(long id) {
-        return departmentRepository.findById(id);
+    public Department getDepartmentById(long id) {
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with ID: " + id));
     }
 
-    public Optional<Department> getDepartmentByName(String name) {
-        return departmentRepository.findByName(name);
+    public Department getDepartmentByName(String name) {
+        return departmentRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with name: " + name));
     }
 
-    public Optional<Department> updateDepartment(Department department) {
-        return departmentRepository.findById(department.getId()).map(
-                existingDepartment -> {
-                    existingDepartment.setName(department.getName());
-                    return departmentRepository.save(existingDepartment);
-                }
-        );
+    public Department updateDepartment(Department department) {
+        Department existingDepartment = departmentRepository.findById(department.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with ID: " + department.getId()));
+
+        existingDepartment.setName(department.getName());
+        return departmentRepository.save(existingDepartment);
     }
 
-    public boolean removeDepartment(long id) {
-        if (departmentRepository.existsById(id)) {
-            departmentRepository.deleteById(id);
-            return true;
+    public void removeDepartment(long id) {
+        if (!departmentRepository.existsById(id)) {
+            throw new EntityNotFoundException("Department not found with ID: " + id);
         }
-        return false;
+        departmentRepository.deleteById(id);
     }
 }
