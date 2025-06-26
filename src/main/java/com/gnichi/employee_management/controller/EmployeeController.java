@@ -82,6 +82,11 @@ public class EmployeeController {
         }
     }
 
+    @GetMapping("/get-by-department-id/{departmentId}")
+    public ResponseEntity<List<Employee>> getEmployeesByDepartmentId(@PathVariable Long departmentId) {
+        return new ResponseEntity<>(employeeService.fetchEmployeesByDepartmentId(departmentId), HttpStatus.OK);
+    }
+
     /* @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
         employee.setId(id); // ensure the path ID is synced with the object

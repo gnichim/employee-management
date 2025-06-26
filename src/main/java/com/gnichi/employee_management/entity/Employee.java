@@ -30,6 +30,11 @@ public class Employee {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @ManyToOne
+    // Creates the foreign key department_id in employee_tbl
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     public enum Gender {
         MALE,
         FEMALE
