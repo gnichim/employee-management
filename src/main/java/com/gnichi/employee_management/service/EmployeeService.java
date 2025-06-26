@@ -8,7 +8,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeService {
@@ -28,6 +27,7 @@ public class EmployeeService {
                 .orElseThrow(() -> new EntityNotFoundException("Department not found with ID: " + deptId));
         // Ensures the saved employee has a full Department reference, including the name.
         employee.setDepartment(department);
+
         return employeeRepository.save(employee);
     }
 
@@ -35,36 +35,39 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public Optional<Employee> getEmployeeById(long id) {
-        return employeeRepository.findById(id);
+    public Employee getEmployeeById(long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + id));
     }
 
-    public Optional<Employee> getEmployeeByName(String firstname) {
-        return employeeRepository.findByFirstname(firstname);
+    public Employee getEmployeeByName(String firstname) {
+        return employeeRepository.findByFirstname(firstname)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found with firstname: " + firstname));
     }
 
     public List<Employee> fetchEmployeesByDepartmentId(Long id) {
         return employeeRepository.findByDepartmentId(id);
     }
 
-    public Optional<Employee> updateEmployee(Employee employee) {
-        return employeeRepository.findById(employee.getId()).map(existingEmployee -> {
+    public Employee updateEmployee(Employee employee) {
+        Employee existingEmployee = employeeRepository.findById(employee.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + employee.getId()));
+
             existingEmployee.setFirstname(employee.getFirstname());
             existingEmployee.setLastname(employee.getLastname());
             existingEmployee.setContractStartDate(employee.getContractStartDate());
             existingEmployee.setContractEndDate(employee.getContractEndDate());
             existingEmployee.setJobTitle(employee.getJobTitle());
             existingEmployee.setGender(employee.getGender());
+
             return employeeRepository.save(existingEmployee);
-        });
     }
 
-    public boolean removeEmployee(long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return true;
+    public void removeEmployee(long id) {
+        if (!employeeRepository.existsById(id)) {
+            throw new EntityNotFoundException("Employee not found with ID: " + id);
         }
-        return false;
+        employeeRepository.deleteById(id);
     }
 
 }

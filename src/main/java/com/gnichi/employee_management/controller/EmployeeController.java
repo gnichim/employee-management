@@ -2,16 +2,11 @@ package com.gnichi.employee_management.controller;
 
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.service.EmployeeService;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -24,22 +19,10 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
-        try {
-            Employee saved = employeeService.createEmployee(employee);
-            return new ResponseEntity<>(saved, HttpStatus.CREATED);
-        } catch (EntityNotFoundException ex) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("timestamp", LocalDateTime.now());
-            response.put("status", HttpStatus.NOT_FOUND.value());
-            response.put("error", "Department not found");
-            response.put("message", ex.getMessage());
-            response.put("path", "/api/employees");
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        Employee saved = employeeService.createEmployee(employee);
 
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-
-        // return new ResponseEntity<>(employeeService.createEmployee(employee), HttpStatus.CREATED);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -55,21 +38,10 @@ public class EmployeeController {
     } */
 
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<?> getEmployeeById(@PathVariable long id) {
-        Optional<Employee> optional = employeeService.getEmployeeById(id);
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable long id) {
+        Employee employee = employeeService.getEmployeeById(id);
 
-        if (optional.isPresent()) {
-            return new ResponseEntity<>(optional.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Employee not found");
-            errorDetails.put("message", "No employee found with id: " + id);
-            errorDetails.put("path", "/api/employees/get-by-id/" + id);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(employee, HttpStatus.OK);
     }
 
     /* @GetMapping("/get-by-firstname/{name}")
@@ -80,21 +52,10 @@ public class EmployeeController {
     } */
 
     @GetMapping("/get-by-firstname/{name}")
-    public ResponseEntity<?> getEmployeeByFirstName(@PathVariable String name) {
-        Optional<Employee> optional = employeeService.getEmployeeByName(name);
+    public ResponseEntity<Employee> getEmployeeByFirstName(@PathVariable String name) {
+        Employee employee = employeeService.getEmployeeByName(name);
 
-        if (optional.isPresent()) {
-            return new ResponseEntity<>(optional.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Employee not found");
-            errorDetails.put("message", "No employee found with firstname: " + name);
-            errorDetails.put("path", "/api/employees/get-by-firstname/" + name);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(employee, HttpStatus.OK);
     }
 
     @GetMapping("/get-by-department-id/{departmentId}")
@@ -111,23 +72,12 @@ public class EmployeeController {
     } */
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
+    public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
         employee.setId(id); // ensure the path ID is synced with the object
 
-        Optional<Employee> result = employeeService.updateEmployee(employee);
+        Employee result = employeeService.updateEmployee(employee);
 
-        if (result.isPresent()) {
-            return new ResponseEntity<>(result.get(), HttpStatus.OK);
-        } else {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", HttpStatus.NOT_FOUND.value());
-            errorDetails.put("error", "Employee not found");
-            errorDetails.put("message", "No employee found with ID: " + id);
-            errorDetails.put("path", "/api/employees/" + id);
-
-            return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 
@@ -139,20 +89,10 @@ public class EmployeeController {
     } */
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable long id) {
-        boolean deleted = employeeService.removeEmployee(id);
+    public ResponseEntity<Void> deleteEmployee(@PathVariable long id) {
+        employeeService.removeEmployee(id);
 
-        if (deleted) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put("timestamp", LocalDateTime.now());
-            response.put("status", HttpStatus.NOT_FOUND.value());
-            response.put("error", "Employee not found");
-            response.put("message", "No employee found with ID: " + id);
-            response.put("path", "/api/employees/" + id);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }
