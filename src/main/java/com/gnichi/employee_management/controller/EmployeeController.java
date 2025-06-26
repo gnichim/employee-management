@@ -2,6 +2,7 @@ package com.gnichi.employee_management.controller;
 
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.service.EmployeeService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,22 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-        return new ResponseEntity<>(employeeService.createEmployee(employee), HttpStatus.CREATED);
+    public ResponseEntity<?> createEmployee(@RequestBody Employee employee) {
+        try {
+            Employee saved = employeeService.createEmployee(employee);
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+        } catch (EntityNotFoundException ex) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("timestamp", LocalDateTime.now());
+            response.put("status", HttpStatus.NOT_FOUND.value());
+            response.put("error", "Department not found");
+            response.put("message", ex.getMessage());
+            response.put("path", "/api/employees");
+
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        // return new ResponseEntity<>(employeeService.createEmployee(employee), HttpStatus.CREATED);
     }
 
     @GetMapping
