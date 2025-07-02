@@ -95,5 +95,11 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/get-by-manager-id/{managerId}")
+    public ResponseEntity<List<Employee>> getEmployeesByManagerId(@PathVariable Long managerId) {
+        List<Employee> employees = employeeService.getEmployeesByManagerId(managerId);
+        return new ResponseEntity<>(employees, HttpStatus.OK);
+    }
+
 }
 

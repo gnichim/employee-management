@@ -28,6 +28,20 @@ public class EmployeeService {
         // Ensures the saved employee has a full Department reference, including the name.
         employee.setDepartment(department);
 
+        if (employee.getManager() != null && employee.getManager().getId() != 0) {
+            Long managerId = employee.getManager().getId();
+            Employee manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+            employee.setManager(manager);
+        } else {
+            employee.setManager(null); // Optional: clear if not provided
+        }
+
+        // Prevent Self-Management: prevent someone from being their own manager
+        if (employee.getManager() != null && employee.getManager().getId().equals(employee.getId())) {
+            throw new IllegalArgumentException("An employee cannot be their own manager.");
+        }
+
         return employeeRepository.save(employee);
     }
 
@@ -68,6 +82,10 @@ public class EmployeeService {
             throw new EntityNotFoundException("Employee not found with ID: " + id);
         }
         employeeRepository.deleteById(id);
+    }
+
+    public List<Employee> getEmployeesByManagerId(Long managerId) {
+        return employeeRepository.findByManagerId(managerId);
     }
 
 }
