@@ -4,6 +4,7 @@ import com.gnichi.employee_management.entity.Department;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.repository.DepartmentRepository;
 import com.gnichi.employee_management.repository.EmployeeRepository;
+import com.gnichi.employee_management.utility.EmployeeValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class EmployeeService {
             Long managerId = employee.getManager().getId();
             Employee manager = employeeRepository.findById(managerId)
                     .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+            EmployeeValidator.validateNoCircularManagement(employee, manager);
             employee.setManager(manager);
         } else {
             employee.setManager(null); // Optional: clear if not provided
@@ -67,17 +69,33 @@ public class EmployeeService {
         Employee existingEmployee = employeeRepository.findById(employee.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + employee.getId()));
 
-            existingEmployee.setFirstname(employee.getFirstname());
-            existingEmployee.setLastname(employee.getLastname());
-            existingEmployee.setContractStartDate(employee.getContractStartDate());
-            existingEmployee.setContractEndDate(employee.getContractEndDate());
-            existingEmployee.setJobTitle(employee.getJobTitle());
-            existingEmployee.setGender(employee.getGender());
+        existingEmployee.setFirstname(employee.getFirstname());
+        existingEmployee.setLastname(employee.getLastname());
+        existingEmployee.setContractStartDate(employee.getContractStartDate());
+        existingEmployee.setContractEndDate(employee.getContractEndDate());
+        existingEmployee.setJobTitle(employee.getJobTitle());
+        existingEmployee.setGender(employee.getGender());
 
-            return employeeRepository.save(existingEmployee);
+        if (employee.getManager() != null && employee.getManager().getId() != 0) {
+            Long managerId = employee.getManager().getId();
+            Employee manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+
+            EmployeeValidator.validateNoCircularManagement(existingEmployee, manager);
+            existingEmployee.setManager(manager);
+        } else {
+            existingEmployee.setManager(null);
+        }
+
+        return employeeRepository.save(existingEmployee);
     }
 
     public void removeEmployee(long id) {
+        List<Employee> subordinates = employeeRepository.findByManagerId(id);
+        if (!subordinates.isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete employee who is a manager of other employees.");
+        }
+
         if (!employeeRepository.existsById(id)) {
             throw new EntityNotFoundException("Employee not found with ID: " + id);
         }
