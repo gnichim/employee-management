@@ -1,9 +1,11 @@
 package com.gnichi.employee_management.service;
 
+import com.gnichi.employee_management.dto.EmployeeSearchRequest;
 import com.gnichi.employee_management.entity.Department;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.repository.DepartmentRepository;
 import com.gnichi.employee_management.repository.EmployeeRepository;
+import com.gnichi.employee_management.specification.EmployeeSpecification;
 import com.gnichi.employee_management.utility.EmployeeValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -104,6 +106,10 @@ public class EmployeeService {
 
     public List<Employee> getEmployeesByManagerId(Long managerId) {
         return employeeRepository.findByManagerId(managerId);
+    }
+
+    public List<Employee> searchEmployees(EmployeeSearchRequest request) {
+        return employeeRepository.findAll(EmployeeSpecification.withFilters(request));
     }
 
 }

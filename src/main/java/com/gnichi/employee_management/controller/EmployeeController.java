@@ -1,5 +1,6 @@
 package com.gnichi.employee_management.controller;
 
+import com.gnichi.employee_management.dto.EmployeeSearchRequest;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.service.EmployeeService;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,12 @@ public class EmployeeController {
     public ResponseEntity<List<Employee>> getEmployeesByManagerId(@PathVariable Long managerId) {
         List<Employee> employees = employeeService.getEmployeesByManagerId(managerId);
         return new ResponseEntity<>(employees, HttpStatus.OK);
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<Employee>> searchEmployees(@RequestBody EmployeeSearchRequest request) {
+        List<Employee> result = employeeService.searchEmployees(request);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }
