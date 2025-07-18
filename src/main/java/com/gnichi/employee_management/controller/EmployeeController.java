@@ -2,6 +2,7 @@ package com.gnichi.employee_management.controller;
 
 import com.gnichi.employee_management.dto.EmployeeCreateRequest;
 import com.gnichi.employee_management.dto.EmployeeSearchRequest;
+import com.gnichi.employee_management.dto.EmployeeUpdateRequest;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.exception.ApiErrorResponse;
 import com.gnichi.employee_management.service.EmployeeService;
@@ -93,13 +94,30 @@ public class EmployeeController {
     } */
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable long id, @RequestBody Employee employee) {
-        employee.setId(id); // ensure the path ID is synced with the object
+    public ResponseEntity<?> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeUpdateRequest request,
+            BindingResult bindingResult) {
 
-        Employee result = employeeService.updateEmployee(employee);
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .collect(Collectors.toList());
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+            ApiErrorResponse response = new ApiErrorResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "Validation failed",
+                    "/api/employees/" + id
+            );
+            response.setMessage(String.join("; ", errors));
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        Employee updated = employeeService.updateEmployee(id, request);
+        return new ResponseEntity<>(updated, HttpStatus.OK);
     }
+
 
 
     /* @DeleteMapping("/{id}")

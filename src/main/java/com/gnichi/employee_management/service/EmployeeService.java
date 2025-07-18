@@ -2,6 +2,7 @@ package com.gnichi.employee_management.service;
 
 import com.gnichi.employee_management.dto.EmployeeCreateRequest;
 import com.gnichi.employee_management.dto.EmployeeSearchRequest;
+import com.gnichi.employee_management.dto.EmployeeUpdateRequest;
 import com.gnichi.employee_management.entity.Department;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.repository.DepartmentRepository;
@@ -79,23 +80,31 @@ public class EmployeeService {
         return employeeRepository.findByDepartmentId(id);
     }
 
-    public Employee updateEmployee(Employee employee) {
-        Employee existingEmployee = employeeRepository.findById(employee.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + employee.getId()));
+    public Employee updateEmployee(Long id, EmployeeUpdateRequest request) {
+        Employee existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found with ID: " + id));
 
-        existingEmployee.setFirstname(employee.getFirstname());
-        existingEmployee.setLastname(employee.getLastname());
-        existingEmployee.setContractStartDate(employee.getContractStartDate());
-        existingEmployee.setContractEndDate(employee.getContractEndDate());
-        existingEmployee.setJobTitle(employee.getJobTitle());
-        existingEmployee.setGender(employee.getGender());
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with ID: " + request.getDepartmentId()));
 
-        if (employee.getManager() != null && employee.getManager().getId() != 0) {
-            Long managerId = employee.getManager().getId();
-            Employee manager = employeeRepository.findById(managerId)
-                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + managerId));
+        existingEmployee.setFirstname(request.getFirstname());
+        existingEmployee.setLastname(request.getLastname());
+        existingEmployee.setContractStartDate(request.getContractStartDate());
+        existingEmployee.setContractEndDate(request.getContractEndDate());
+        existingEmployee.setJobTitle(request.getJobTitle());
+        existingEmployee.setGender(request.getGender());
+        existingEmployee.setDepartment(department);
+
+        if (request.getManagerId() != null && request.getManagerId() != 0) {
+            Employee manager = employeeRepository.findById(request.getManagerId())
+                    .orElseThrow(() -> new EntityNotFoundException("Manager not found with ID: " + request.getManagerId()));
 
             EmployeeValidator.validateNoCircularManagement(existingEmployee, manager);
+
+            if (manager.getId().equals(existingEmployee.getId())) {
+                throw new IllegalArgumentException("An employee cannot be their own manager.");
+            }
+
             existingEmployee.setManager(manager);
         } else {
             existingEmployee.setManager(null);
