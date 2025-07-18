@@ -2,12 +2,16 @@ package com.gnichi.employee_management.controller;
 
 import com.gnichi.employee_management.dto.EmployeeSearchRequest;
 import com.gnichi.employee_management.entity.Employee;
+import com.gnichi.employee_management.exception.ApiErrorResponse;
 import com.gnichi.employee_management.service.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -20,7 +24,22 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<?> createEmployee(@Valid @RequestBody Employee employee, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                    .collect(Collectors.toList());
+
+            ApiErrorResponse response = new ApiErrorResponse(
+                    HttpStatus.BAD_REQUEST,
+                    "Validation failed",
+                    "/api/employees"
+            );
+            response.setMessage(String.join("; ", errors));
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
         Employee saved = employeeService.createEmployee(employee);
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);

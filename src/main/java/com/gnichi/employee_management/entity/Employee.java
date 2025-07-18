@@ -2,7 +2,10 @@ package com.gnichi.employee_management.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.gnichi.employee_management.validation.CapitalizedWords;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,15 +30,25 @@ public class Employee {
     * into thinking the entity is already persisted or cause issues with identity generation.
     * */
     private Long id;
+
+    @NotBlank(message = "Firstname is required")
     @Column(length = 50)
     private String firstname;
+
+    @NotBlank(message = "Lastname is required")
     @Column(length = 50)
     private String lastname;
+
+    @CapitalizedWords
     private String jobTitle;
+
+    @NotNull(message = "Contract start date is required")
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate contractStartDate;
+
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate contractEndDate;
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
