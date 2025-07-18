@@ -1,5 +1,6 @@
 package com.gnichi.employee_management.controller;
 
+import com.gnichi.employee_management.dto.EmployeeCreateRequest;
 import com.gnichi.employee_management.dto.EmployeeSearchRequest;
 import com.gnichi.employee_management.entity.Employee;
 import com.gnichi.employee_management.exception.ApiErrorResponse;
@@ -24,7 +25,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createEmployee(@Valid @RequestBody Employee employee, BindingResult bindingResult) {
+    public ResponseEntity<?> createEmployee(@Valid @RequestBody EmployeeCreateRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             List<String> errors = bindingResult.getFieldErrors().stream()
                     .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -40,7 +41,7 @@ public class EmployeeController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        Employee saved = employeeService.createEmployee(employee);
+        Employee saved = employeeService.createEmployee(request);
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
